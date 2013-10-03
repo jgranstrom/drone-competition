@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <title> Example drone </title>
+    <script src="http://192.168.1.2:3000/socket.io/socket.io.js"></script>
+    <script src="http://192.168.1.2:3000/static/mousetrap.js"></script>
+    <script src="http://192.168.1.2:3000/static/nodecopter-stream.js"></script>
+  </head>
+
+  <script type="text/javascript">
+    var socket = io.connect('http://192.168.1.2:3000');
+
+    socket.on('connect', function (data) {
+      socket.emit('request-drone', 'overlord');
+    });
+
+    var commands = {
+      "e" : {"down" : "takeoff"},
+      "space" : {"down" : "land"},
+      "up" : {"down" : "up", "up" : "up-stop"},
+      "down" : {"down" : "down", "up" : "down-stop"},
+      "right" : {"down" : "clockwise", "up" : "clockwise-stop"},
+      "left" : {"down" : "counter-clockwise", "up" : "counter-clockwise-stop"},
+      "w" : {"down" : "front", "up" : "front-stop"},
+      "s" : {"down" : "back", "up" : "back-stop"},
+      "d" : {"down" : "right", "up" : "right-stop"},
+      "a" : {"down" : "left", "up" : "left-stop"},
+      "k" : {"down" : "flip-left"},
+      "l" : {"down" : "flip-right"},
+      "o" : {"down" : "vz-dance"},
+      "q" : {"down" : "stop"},
+      "r" : {"down" : "disable-emergency"}
+    };
+
+
+    function bind (keyboardKey, cmdOnDown, cmdOnUp) {
+
+      Mousetrap.bind(keyboardKey, function() {
+        console.log("cmdOnDown", cmdOnDown)
+
+        socket.emit("drone/command", cmdOnDown);
+      }, 'keydown');
+      if (cmdOnUp) {
+        Mousetrap.bind(keyboardKey, function() {
+          console.log("cmdOnUp", cmdOnUp)
+          socket.emit("drone/command", cmdOnUp);
+        }, 'keyup');
+      }
+
+    };
+
+    for(var key in commands) {
+      bind(key, commands[key].down, commands[key].up)
+    }
+  </script>
+  <body>
+
+    <div id="droneStream" style="width: 640; height: 360"></div>
+
+    <script type="text/javascript">
+      new NodecopterStream(document.getElementById("droneStream"), socket, 'stream-overlord');
+    </script>
+
+
+  </body>
+</html>
