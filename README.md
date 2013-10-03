@@ -49,4 +49,4 @@ api
 example app
 ----
 
-Check out the example app for some pointers and inspiration.
+Check out the example code in `./index.html` for some pointers and inspiration.
